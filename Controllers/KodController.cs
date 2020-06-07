@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using KodApp.Models;
+using ReflectionIT.Mvc.Paging;
 
 namespace KodApp.Controllers
 {
@@ -24,17 +25,82 @@ namespace KodApp.Controllers
         //    return View(await _context.Kods.ToListAsync());
         //}
 
-        public async Task<IActionResult> Index(string searchBy, string search, int? page)
+        //public async Task<IActionResult> Index(string searchBy, string search, int page = 1)
+        //{
+        //    {
+        //        var query = _context.Kods.AsNoTracking().OrderBy(s => s.title);
+        //        var model = await PagingList.CreateAsync(query, 10, page);
+        //        return View(model);
+        //    }
+
+        //    if (searchBy == "title")
+        //    {
+        //        return View(await _context.Kods.Where(x => x.title.StartsWith(search) || search == null).ToListAsync());
+        //    }
+        //    else
+        //    {
+        //        return View(await _context.Kods.Where(x => x.artist.StartsWith(search) || search == null).ToListAsync());
+        //    }
+        //}
+        ///*----------------------------------------------------------------------------*/
+
+        //public async Task<IActionResult> Index(int page = 1)
+        //{
+        //    var query = _context.Kods.AsNoTracking().OrderBy(s => s.title);
+        //    var model = await PagingList.CreateAsync(query, 5, page);
+        //    return View(model);
+        //}
+        /*----------------------------------------------------------------------------*/
+
+        public async Task<IActionResult> Index(
+     string sortOrder,
+     string currentFilter,
+     string searchString,
+     int? page)
         {
-            if (searchBy == "title")
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "title_desc" : "";
+            ViewData["DateSortParm"] = sortOrder == "Artist" ? "artist_desc" : "Artist";
+
+            if (searchString != null)
             {
-                return View(await _context.Kods.Where(x => x.title.StartsWith(search) || search == null).ToListAsync());
+                page = 1;
             }
             else
             {
-                return View(await _context.Kods.Where(x => x.artist.StartsWith(search) || search == null).ToListAsync());
+                searchString = currentFilter;
             }
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var Kods = from s in _context.Kods
+                           select s;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                Kods = Kods.Where(s => s.title.Contains(searchString)
+                                       || s.artist.Contains(searchString));
+            }
+            switch (sortOrder)
+            {
+                case "title_desc":
+                    Kods = Kods.OrderByDescending(s => s.title);
+                    break;
+                case "Artist":
+                    Kods = Kods.OrderBy(s => s.artist);
+                    break;
+                case "date_desc":
+                    Kods = Kods.OrderByDescending(s => s.description);
+                    break;
+                default:
+                    Kods = Kods.OrderBy(s => s.title);
+                    break;
+            }
+
+            int pageSize = 10;
+            return View(await PaginatedList<Kod>.CreateAsync(Kods.AsNoTracking(), page ?? 1, pageSize));
         }
+
+        /*----------------------------------------------------------------------------*/
 
         // GET: Kod/Details/5
         public async Task<IActionResult> Details(int? id)

@@ -1,66 +1,83 @@
-﻿@model IEnumerable<KodApp.Models.Kod>
+﻿@model PaginatedList<KodApp.Models.Kod>
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+
+<h2>Students</h2>
 
 <p>
     <a asp-action="Create">Create New</a>
 </p>
 
-<div class="text-center">
-    <p>
-        @using (Html.BeginForm("Index", "Kod", FormMethod.Get))
-        {
-            <b>Search By:</b>
-            <b>@Html.RadioButton("searchBy", "title", true) <text>title</text></b>
-            <b>@Html.RadioButton("searchBy", "artist") <text>artist</text><br /></b>
-            <b>@Html.TextBox("search") <input type="submit" value="Search" /></b>
-        }
-    </p>
-</div>
+<form asp-action="Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by name: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
+            <input type="submit" value="Search" class="btn btn-default btn" /> |
+            <a asp-action="Index">Back to Full List</a>
+        </p>
+    </div>
+</form>
 
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.songNumber)
+                SONG NUMBER
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.title)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">TITLE</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.artist)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.description)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">ARTIST</a>
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.songNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.artist)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.description)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.videokeId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.videokeId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.videokeId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.songNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.artist)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.description)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.videokeId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.videokeId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.videokeId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-page="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @prevDisabled btn">
+    Previous
+</a>
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-page="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @nextDisabled btn">
+    Next
+</a>

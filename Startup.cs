@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ReflectionIT.Mvc.Paging;
 
 namespace KodApp
 {
@@ -28,6 +29,8 @@ namespace KodApp
 
             services.AddDbContext<KodContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DevConnection")));
+
+           // services.AddPaging();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
